@@ -17,7 +17,7 @@
   },
   "homepage": "https://github.com/3dw1np/alicloud-s3-oss#readme",
   "devDependencies": {
-    "ali-oss": "^6.5.1",
     "aws-sdk": "^2.606.0"
-  }
+  },
+  "dependencies": {}
 }

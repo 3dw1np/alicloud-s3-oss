@@ -1,18 +1,26 @@
 'use strict';
 
 const AWS = require('aws-sdk');
-
-const s3 = new AWS.S3();
+const OSS = require('ali-oss');
 
 const s3BucketName = process.env.S3_BUCKET_NAME
+const ossBucketName = process.env.OSS_BUCKET_NAME
 
-module.exports.replicate = async event => {
+const s3Client = new AWS.S3();
+const ossClient = new OSS({
+  region: process.env.ALICLOUD_REGION,
+  accessKeyId: process.env.ALICLOUD_ACCESS_KEY,
+  accessKeySecret: process.env.ALICLOUD_SECRET_KEY,
+  bucket: ossBucketName
+});
+
+module.exports.replicate = async (event, context) => {
   if (!s3BucketName) {
-    context.fail('Error: Environment variable S3_BUCKET_NAME missing')
+    context.fail('ERROR: Environment variable S3_BUCKET_NAME missing')
     return
   }
   if (event.Records === null) {
-    context.fail('Error: Event has no records.')
+    context.fail('ERROR: Event has no records.')
     return
   }
 
@@ -23,7 +31,10 @@ module.exports.replicate = async event => {
 
   Promise.all(tasks)
     .then(() => { context.succeed() })
-    .catch(() => { context.fail() })
+    .catch((err) => {
+      console.error(err);
+      context.fail();
+    })
 };
 
 function replicatePromise(record) {
@@ -31,11 +42,22 @@ function replicatePromise(record) {
     const srcBucket = record.s3.bucket.name
     const srcKey = decodeURIComponent(record.s3.object.key.replace(/\+/g, " "))
 
-    const destBucket = 'OSS';
-    const destKey = 'null';
+    const destBucket = ossBucketName;
+    const destKey = encodeURIComponent(srcKey);
 
-    var msg = 'Copying from S3 ' + srcBucket + ':' + srcKey + ' to OOS ' + destBucket + ':' + destKey;
+    var msg = 'copying from S3 ' + srcBucket + ':' + srcKey + ' to OSS ' + destBucket + ':' + destKey;
+    console.log('Attempting ' + msg)
 
-    console.log('Attempting: ' + msg)
+    const params = { Bucket: srcBucket, Key: srcKey };
+    const s3StreamFile = s3Client.getObject(params).createReadStream();
+    s3StreamFile.on('error', function(err) {
+      console.error(err);
+    });
+
+    ossClient.put(destKey, s3StreamFile).then((result) => {
+      console.log(result);
+    });
+
+    resolve();
   })
 }

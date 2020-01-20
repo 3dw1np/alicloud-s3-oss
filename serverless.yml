@@ -2,6 +2,7 @@ service: alicloud-s3-oss
 
 custom:
   s3BucketName: oss-test-200120
+  ossBucketName: oss-test-200120
 
 provider:
   name: aws
@@ -19,14 +20,22 @@ provider:
         - s3:GetObjectAcl
       Resource: "arn:aws:s3:::${self:custom.s3BucketName}/*"
 
+layers:
+  commonLibs:
+    path: layer
+    compatibleRuntimes:
+      - nodejs12.x
+
 functions:
   replicate:
     handler: handler.replicate
     environment:
       S3_BUCKET_NAME: ${self:custom.s3BucketName}
+      OSS_BUCKET_NAME: ${self:custom.ossBucketName}
+      ALICLOUD_ACCESS_KEY: 'ALICLOUD_ACCESS_KEY'
+      ALICLOUD_SECRET_KEY: 'ALICLOUD_SECRET_KEY'
+      ALICLOUD_REGION: 'ALICLOUD_REGION'
+    layers:
+      - {Ref: CommonLibsLambdaLayer}
     events:
-      - s3:
-        bucket: ${self:custom.s3BucketName}
-        event: s3:ObjectCreated:*
-        rules:
-          - prefix: /
+      - s3: ${self:custom.s3BucketName}
