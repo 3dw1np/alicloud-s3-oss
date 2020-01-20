@@ -1,0 +1,28 @@
+service: alicloud-s3-oss
+
+custom:
+  s3BucketName: oss-test-200120
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  stage: dev
+  region: eu-west-1
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action:
+        - "s3:ListBucket"
+      Resource: "arn:aws:s3:::${self:custom.s3BucketName}/*"
+    - Effect: Allow
+      Action:
+        - s3:GetObject
+        - s3:GetObjectAcl
+      Resource: "arn:aws:s3:::${self:custom.s3BucketName}/*"
+
+functions:
+  hello:
+    handler: handler.hello
+    environment:
+      S3_BUCKETNAME: ${self:custom.s3BucketName}
+    events:
+      - s3: ${self:custom.s3BucketName}

@@ -1,0 +1,23 @@
+{
+  "name": "alicloud-s3-oss",
+  "version": "1.0.0",
+  "description": "",
+  "main": "handler.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/3dw1np/alicloud-s3-oss.git"
+  },
+  "author": "Edwin Polycarpe",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/3dw1np/alicloud-s3-oss/issues"
+  },
+  "homepage": "https://github.com/3dw1np/alicloud-s3-oss#readme",
+  "devDependencies": {
+    "ali-oss": "^6.5.1",
+    "aws-sdk": "^2.606.0"
+  }
+}
