@@ -20,9 +20,13 @@ provider:
       Resource: "arn:aws:s3:::${self:custom.s3BucketName}/*"
 
 functions:
-  hello:
-    handler: handler.hello
+  replicate:
+    handler: handler.replicate
     environment:
-      S3_BUCKETNAME: ${self:custom.s3BucketName}
+      S3_BUCKET_NAME: ${self:custom.s3BucketName}
     events:
-      - s3: ${self:custom.s3BucketName}
+      - s3:
+        bucket: ${self:custom.s3BucketName}
+        event: s3:ObjectCreated:*
+        rules:
+          - prefix: /
