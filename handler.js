@@ -8,6 +8,7 @@ const ossBucketName = process.env.OSS_BUCKET_NAME
 
 const s3Client = new AWS.S3();
 const ossClient = new OSS({
+  endpoint: process.env.ALICLOUD_OSS_ENDPOINT,
   region: process.env.ALICLOUD_REGION,
   accessKeyId: process.env.ALICLOUD_ACCESS_KEY,
   accessKeySecret: process.env.ALICLOUD_SECRET_KEY,
@@ -54,10 +55,9 @@ function replicatePromise(record) {
       console.error(err);
     });
 
-    ossClient.put(destKey, s3StreamFile).then((result) => {
-      console.log(result);
-    });
+    const result = await ossClient.putStream(destKey, s3StreamFile);
+    console.log(result);
+    resolve(result);
 
-    resolve();
   })
 }
